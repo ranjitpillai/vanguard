@@ -40,9 +40,9 @@ class User extends Authenticatable implements TwoFactorAuthenticatableContract, 
      * @var array
      */
     protected $fillable = [
-        'email', 'password', 'username', 'first_name', 'last_name', 'phone', 'avatar',
+        'name', 'email', 'password', 'username', 'first_name', 'last_name', 'phone', 'avatar',
         'address', 'country_id', 'birthday', 'last_login', 'confirmation_token', 'status',
-        'remember_token', 'role_id'
+        'group_id', 'remember_token', 'role_id','street1','street2','city','postal_code','state','state_code','company_code','email_token','is_email_verified', 'transactions_left','api_token'
     ];
 
     /**
@@ -88,6 +88,10 @@ class User extends Authenticatable implements TwoFactorAuthenticatableContract, 
     public function isBanned()
     {
         return $this->status == UserStatus::BANNED;
+    }
+	public function socialNetworks()
+    {
+        return $this->hasOne(UserSocialNetworks::class, 'user_id');
     }
 
     public function country()

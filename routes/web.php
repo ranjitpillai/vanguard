@@ -3,6 +3,10 @@
 /**
  * Authentication
  */
+//Route::get('home', 'FrontendController@index');
+Route::get('home', function () {
+    return view('static/default');
+});
 Route::get('active-users', 'ActiveUsersController@index')->name('active-users');
 
 Route::get('login', 'Auth\AuthController@getLogin');
@@ -156,6 +160,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('user/{user}/update/details', [
         'as' => 'user.update.details',
         'uses' => 'UsersController@updateDetails'
+    ]);
+	
+	Route::put('user/{user}/update/social-networks', [
+        'as' => 'user.update.socials',
+        'uses' => 'UsersController@updateSocialNetworks'
     ]);
 
     Route::put('user/{user}/update/login-details', [

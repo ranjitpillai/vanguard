@@ -19,7 +19,9 @@ use Vanguard\Repositories\Session\SessionRepository;
 use Vanguard\Repositories\User\UserRepository;
 use Vanguard\Services\Upload\UserAvatarManager;
 use Vanguard\Support\Enum\UserStatus;
+use Vanguard\Repositories\Device\DeviceRepository;
 use Vanguard\User;
+use Vanguard\Device;
 use Auth;
 use Authy;
 use Illuminate\Http\Request;
@@ -35,17 +37,18 @@ class UsersController extends Controller
      * @var UserRepository
      */
     private $users;
-
+	private $devices;
     /**
      * UsersController constructor.
      * @param UserRepository $users
      */
-    public function __construct(UserRepository $users)
+    public function __construct(UserRepository $users,DeviceRepository $devices)
     {
         $this->middleware('auth');
         $this->middleware('session.database', ['only' => ['sessions', 'invalidateSession']]);
         $this->middleware('permission:users.manage');
         $this->users = $users;
+		$this->devices = $devices;
     }
 
     /**
@@ -60,7 +63,9 @@ class UsersController extends Controller
             Input::get('search'),
             Input::get('status')
         );
-
+		for($i=0;$i<count($users);$i++){
+			$users[$i]["devices"] = count($this->devices->get_devices($users[$i]["id"]));
+		}
         $statuses = ['' => trans('app.all')] + UserStatus::lists();
 
         return view('user.list', compact('users', 'statuses'));
@@ -146,16 +151,39 @@ class UsersController extends Controller
      */
     public function edit(User $user, CountryRepository $countryRepository, RoleRepository $roleRepository)
     {
-        $edit = true;
-        $countries = $this->parseCountries($countryRepository);
-        $roles = $roleRepository->lists();
-        $statuses = UserStatus::lists();
-        $socialLogins = $this->users->getUserSocialLogins($user->id);
-
-        return view(
-            'user.edit',
-            compact('edit', 'user', 'countries', 'socialLogins', 'roles', 'statuses')
-        );
+		
+		$flag = false;
+		if(Auth::user()->hasRole('Admin')){
+			$flag = true;
+		} else if(Auth::user()->hasRole('CompanyAdmin')){
+			
+			if(Auth::user()->company_code == $user->company_code) {
+				$flag = true;
+			} else {
+				$flag = false;
+			}
+		} else if(Auth::user()->company_code == $user->id){
+			$flag = true;
+		} else {
+			$flag = false;
+		}
+		
+		if($flag){
+			$edit = true;
+			$countries = $this->parseCountries($countryRepository);
+			$socials = $user->socialNetworks;
+			
+			$roles = $roleRepository->lists();
+			$statuses = UserStatus::lists();
+			$socialLogins = $this->users->getUserSocialLogins($user->id);
+			
+			return view(
+				'user.edit',
+				compact('edit', 'user', 'countries', 'socials', 'socialLogins', 'roles', 'statuses')
+			);
+		} else {
+			return abort('403');
+		}
     }
 
     /**
@@ -173,7 +201,7 @@ class UsersController extends Controller
             $data['country_id'] = null;
         }
 
-        $this->users->update($user->id, $data);
+        $var = $this->users->update($user->id, $data);
         $this->users->setRole($user->id, $request->role_id);
 
         event(new UpdatedByAdmin($user));
@@ -374,5 +402,15 @@ class UsersController extends Controller
 
         return redirect()->route('user.sessions', $user->id)
             ->withSuccess(trans('app.session_invalidated'));
+    }
+	
+	public function updateSocialNetworks(User $user, Request $request)
+    {
+        $this->users->updateSocialNetworks($user->id, $request->get('socials'));
+
+        event(new UpdatedByAdmin($user));
+
+        return redirect()->route('user.edit', $user->id)
+            ->withSuccess(trans('app.socials_updated'));
     }
 }

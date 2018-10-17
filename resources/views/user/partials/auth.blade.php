@@ -1,12 +1,15 @@
+<div class="panel panel-default">
+    <div class="panel-heading">@lang('app.login_details')</div>
+    <div class="panel-body">
 <div class="form-group">
     <label for="email">@lang('app.email')</label>
     <input type="email" class="form-control" id="email"
-           name="email" placeholder="@lang('app.email')" value="{{ $edit ? $user->email : '' }}">
+           name="email" placeholder="@lang('app.email')" value="{{ $edit ? $user->email : '' }}" @if($edit) readonly @endif>
 </div>
 <div class="form-group">
     <label for="username">@lang('app.username')</label>
     <input type="text" class="form-control" id="username" placeholder="(@lang('app.optional'))"
-           name="username" value="{{ $edit ? $user->username : '' }}">
+           name="username" value="{{ $edit ? $user->username : '' }}" @if($edit) readonly @endif>
 </div>
 <div class="form-group">
     <label for="password">{{ $edit ? trans("app.new_password") : trans('app.password') }}</label>
@@ -24,3 +27,5 @@
         @lang('app.update_details')
     </button>
 @endif
+    </div>
+</div>

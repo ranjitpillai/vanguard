@@ -20,6 +20,11 @@
             <input type="text" class="form-control" id="last_name"
                    name="last_name" placeholder="@lang('app.last_name')" value="{{ $edit ? $user->last_name : '' }}">
         </div>
+		<div class="form-group">
+                    <label for="address">@lang('app.company_code')</label>
+                    <input type="text" class="form-control" id="company_code"
+                           name="company_code" placeholder="@lang('app.company_code')" value="{{ ($edit && isset($company_code) && $company_code!="")?$company_code:($edit ? $user->company_code : '') }}" @if($edit) readonly @endif >
+        </div>
     </div>
 
     <div class="col-md-6">
@@ -33,16 +38,7 @@
                        class="form-control" />
             </div>
         </div>
-        <div class="form-group">
-            <label for="phone">@lang('app.phone')</label>
-            <input type="text" class="form-control" id="phone"
-                   name="phone" placeholder="@lang('app.phone')" value="{{ $edit ? $user->phone : '' }}">
-        </div>
-        <div class="form-group">
-            <label for="address">@lang('app.address')</label>
-            <input type="text" class="form-control" id="address"
-                   name="address" placeholder="@lang('app.address')" value="{{ $edit ? $user->address : '' }}">
-        </div>
+       
         <div class="form-group">
             <label for="address">@lang('app.country')</label>
             {!! Form::select('country_id', $countries, $edit ? $user->country_id : '', ['class' => 'form-control']) !!}
