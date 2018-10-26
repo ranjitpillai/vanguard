@@ -39,6 +39,18 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
+                           id="address_details-tab"
+                           data-toggle="tab"
+                           href="#address_details"
+                           role="tab"
+                           aria-controls="home"
+                           aria-selected="true">
+                            @lang('app.address_details')
+                        </a>
+                    </li>
+					
+                    <li class="nav-item">
+                        <a class="nav-link"
                            id="authentication-tab"
                            data-toggle="tab"
                            href="#login-details"
@@ -81,6 +93,13 @@
                             @include('user.partials.details', ['profile' => false])
                         {!! Form::close() !!}
                     </div>
+					
+					<div class="tab-pane fade show px-2" id="address_details" role="tabpanel" aria-labelledby="nav-home-tab">
+                        {!! Form::open(['route' => ['user.update.address_details', $user->id], 'method' => 'PUT', 'id' => 'address-details-form']) !!}
+                            @include('user.partials.address_details')
+                        {!! Form::close() !!}
+                    </div>
+					
 
                     <div class="tab-pane fade px-2" id="login-details" role="tabpanel" aria-labelledby="nav-profile-tab">
                         {!! Form::open(['route' => ['user.update.login-details', $user->id], 'method' => 'PUT', 'id' => 'login-details-form']) !!}

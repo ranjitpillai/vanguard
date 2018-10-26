@@ -50,16 +50,5 @@
            data-toggle="tooltip" data-placement="top">
             <i class="fas fa-edit"></i>
         </a>
-        <a href="{{ route('user.delete', $user->id) }}"
-           class="btn btn-icon"
-           title="@lang('app.delete_user')"
-           data-toggle="tooltip"
-           data-placement="top"
-           data-method="DELETE"
-           data-confirm-title="@lang('app.please_confirm')"
-           data-confirm-text="@lang('app.are_you_sure_delete_user')"
-           data-confirm-delete="@lang('app.yes_delete_him')">
-            <i class="fas fa-trash"></i>
-        </a>
     </td>
 </tr>

@@ -9,6 +9,7 @@ use Vanguard\Services\Upload\UserAvatarManager;
 use Vanguard\User;
 use Carbon\Carbon;
 use DB;
+use Auth;
 use Illuminate\Database\SQLiteConnection;
 use Laravel\Socialite\Contracts\User as SocialUser;
 
@@ -45,6 +46,15 @@ class EloquentUser implements UserRepository
     public function findByEmail($email)
     {
         return User::where('email', $email)->first();
+    }
+	public function findByUsername($username)
+    {
+        return User::where('username', $username)->first();
+    }
+	
+	public function findByEmailToken($token)
+    {
+        return User::where('confirmation_token', $token)->first();
     }
 
     /**
@@ -102,7 +112,13 @@ class EloquentUser implements UserRepository
         if ($status) {
             $query->where('status', $status);
         }
-
+		
+		if(!Auth::user()->hasRole('Admin')){
+			if(Auth::user()->hasRole('CompanyAdmin')){
+				$query->where('company_code', Auth::user()->company_code);
+			}
+		}
+		
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('username', "like", "%{$search}%");
@@ -112,7 +128,7 @@ class EloquentUser implements UserRepository
             });
         }
 
-        $result = $query->orderBy('id', 'desc')
+        $result = $query->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
         if ($search) {
@@ -131,6 +147,7 @@ class EloquentUser implements UserRepository
      */
     public function update($id, array $data)
     {
+	
         if (isset($data['country_id']) && $data['country_id'] == 0) {
             $data['country_id'] = null;
         }
@@ -140,6 +157,10 @@ class EloquentUser implements UserRepository
         $user->update($data);
 
         return $user;
+    }
+     public function updateSocialNetworks($userId, array $data)
+    {
+        return $this->find($userId)->socialNetworks()->updateOrCreate([], $data);
     }
 
     /**
@@ -256,6 +277,18 @@ class EloquentUser implements UserRepository
         return $this->find($userId)->setRole($roleId);
     }
 
+   
+	/**
+     * {@inheritdoc}
+     */
+    public function setDeviceId($userId, $deviceId)
+    {
+        return DB::table('user_devices')->insert([
+            'user_id' => $userId,
+            'device_id' => $deviceId,
+        ]);
+    }
+	
     /**
      * {@inheritdoc}
      */
@@ -272,4 +305,121 @@ class EloquentUser implements UserRepository
         return User::where('role_id', $fromRoleId)
             ->update(['role_id' => $toRoleId]);
     }
+	
+	
+	public function addDevice($data){
+	
+		$row = DB::table('user_devices')
+			->where('device_id', $data['phone_number'].'#'.$data['device_id'])
+			->first();
+		
+		if(count($row) > 0){
+			$record["success"] = 0;
+			$record["message"] = "Device Already Registered";
+			return $record;
+		} else {
+			$token = mt_rand(111111,999999);
+			$insert = array(
+				'user_id' => $data["user_id"],
+				'device_id' => $data['phone_number'].'#'.$data['device_id'],
+				'IMEI' => $data['device_id'],
+				'phone_number' => $data['phone_number'],
+				'country_code' => $data['country_code'],
+				'status' => $data["status"],
+				'os_api_level' => $data["os_api_level"],
+				'device' => $data["device"],
+				'model' => $data["model"],
+				'manufacturer' => $data["manufacturer"],
+				'brand' => $data["brand"],
+				'display' => $data["display"],
+				'os_version' => $data["os_version"],
+				'sms_token' => $token,
+			);
+			DB::table('user_devices')->insert($insert);
+			
+			$row = DB::table('user_devices')->where('device_id', $data['phone_number'].'#'.$data['device_id'])->first();
+			$record["success"] = 1;
+			$record["data"] = $row;
+			$record["message"] = "Device Added!";
+			$record["token"] = $token;
+			return $record;
+		}
+		
+	}
+	
+	public function get_devices($user_id){
+		$devices = DB::table('user_devices')
+			->where('user_id', $user_id)
+			->get();
+		
+		return $devices;
+	}
+	
+	public function verify_sms($data){
+		$row = DB::table('user_devices')
+			->where('user_id', $data['user_id'])
+			->where('phone_number', $data['phone_number'])
+			->where('device_id', $data['phone_number']."#".$data['device_id'])
+			->where('sms_token', $data['sms_token'])
+			->first();
+		$json = array();	
+		if(empty($row)){
+			$json["success"] = 0;
+			$json["message"] = "Token does not match!";
+		} else {
+			
+			DB::table('user_devices')
+				->where('user_id', $data['user_id'])
+				->where('phone_number', $data['phone_number'])
+				->where('device_id', $data['phone_number']."#".$data['device_id'])
+				->where('sms_token', $data['sms_token'])
+				->update(['status' => $data["status"]]);
+				
+			$row = DB::table('user_devices')
+			->where('user_id', $data['user_id'])
+			->where('phone_number', $data['phone_number'])
+			->where('device_id', $data['phone_number']."#".$data['device_id'])
+			->where('sms_token', $data['sms_token'])
+			->first();
+				
+			$json["success"] = 1;
+			$json["message"] = "Verified";
+			$json["data"] = $row;
+		}
+		
+		return $json;
+	}
+	
+	public function resend_token($data){
+		$token = mt_rand(111111,999999);
+		$update = array(
+			'user_id' => $data["user_id"],
+			'device_id' => $data['phone_number'].'#'.$data['device_id'],
+			'phone_number' => $data['phone_number'],
+			'country_code' => $data['country_code'],
+		);
+		
+		$u = DB::table('user_devices')->where($update)->update(['status' => $data["status"],'sms_token' => $token]);
+		
+		if($u){
+			$row = DB::table('user_devices')->where('device_id', $data['phone_number'].'#'.$data['device_id'])->first();
+			$json["success"] = 1;
+			$json["data"] = $row;
+			$json["message"] = "SMS Send Again";
+			$json["sms_token"] = $token;
+			return $json;
+		} else {
+			$json["success"] = 0;
+			$json["message"] = "Device not registered!";
+			return $json;
+		}
+		
+	}
+	
+	public function findByApiToken($user_id, $api_token)
+    {
+        return User::where('id', $user_id)->where("api_token",$api_token)->first();
+    }
+
+	
 }

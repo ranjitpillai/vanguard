@@ -35,6 +35,13 @@ interface UserRepository
     public function findByEmail($email);
 
     /**
+     * Find user by username.
+     *
+     * @param $username
+     * @return null|User
+     */
+    public function findByUsername($username);
+    /**
      * Find user registered via social network.
      *
      * @param $provider string Provider used for authentication.
@@ -86,6 +93,13 @@ interface UserRepository
      * @return mixed
      */
     public function associateSocialAccountForUser($userId, $provider, SocialUser $user);
+    /**
+     * Update user social networks.
+     * @param $userId
+     * @param array $data
+     * @return mixed
+     */
+    public function updateSocialNetworks($userId, array $data);
 
     /**
      * Number of users in database.
@@ -137,6 +151,14 @@ interface UserRepository
     public function setRole($userId, $roleId);
 
     /**
+     * Set specified device_id to specified user.
+     *
+     * @param $userId
+     * @param $deviceId
+     * @return mixed
+     */
+    public function setDeviceId($userId, $deviceId);
+    /**
      * Change role for all users who has role $fromRoleId to $toRoleId.
      *
      * @param $fromRoleId Id of current role.
@@ -168,4 +190,9 @@ interface UserRepository
      * @return mixed
      */
     public function findByConfirmationToken($token);
+    public function addDevice($data);
+    public function get_devices($user_id);
+    public function verify_sms($data);
+    public function resend_token($data);
+    public function findByApiToken($user_id,$api_token);
 }

@@ -76,16 +76,6 @@
                                title="@lang('app.edit_company')" data-toggle="tooltip" data-placement="top">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="{{ route('company.delete', $company->id) }}" class="btn btn-danger btn-circle"
-							   title="@lang('app.delete_company')"
-							   data-toggle="tooltip"
-							   data-placement="top"
-							   data-method="DELETE"
-							   data-confirm-title="@lang('app.please_confirm')"
-							   data-confirm-text="@lang('app.are_you_sure_delete_company')"
-							   data-confirm-delete="@lang('app.yes_delete_it')">
-								<i class="fas fa-trash"></i>
-							</a>
                         </td>
                     </tr>
                 @endforeach

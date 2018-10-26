@@ -60,6 +60,19 @@
                         <i class="fas fa-user text-muted mr-2"></i>
                         @lang('app.my_profile')
                     </a>
+					@if(Auth::user()->present()->role->id == 3)
+							
+					<a class="dropdown-item" href="{{ route('company.profile.edit') }}">
+                        <i class="fas fa-user text-muted mr-2"></i>
+                        @lang('app.company_profile')
+                    </a>
+					@endif
+					@if(Auth::user()->present()->role->id == 4)
+						<a class="dropdown-item" href="{{ route('company.profile.view') }}">
+							<i class="fas fa-user text-muted mr-2"></i>
+							@lang('app.company_profile')
+						</a>
+					@endif
                     @if (config('session.driver') == 'database')
                         <a href="{{ route('profile.sessions') }}" class="dropdown-item">
                             <i class="fas fa-list text-muted mr-2"></i>

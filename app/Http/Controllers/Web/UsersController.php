@@ -11,6 +11,7 @@ use Vanguard\Http\Controllers\Controller;
 use Vanguard\Http\Requests\User\CreateUserRequest;
 use Vanguard\Http\Requests\User\EnableTwoFactorRequest;
 use Vanguard\Http\Requests\User\UpdateDetailsRequest;
+use Vanguard\Http\Requests\User\UpdateAddressDetailsRequest;
 use Vanguard\Http\Requests\User\UpdateLoginDetailsRequest;
 use Vanguard\Repositories\Activity\ActivityRepository;
 use Vanguard\Repositories\Country\CountryRepository;
@@ -412,5 +413,14 @@ class UsersController extends Controller
 
         return redirect()->route('user.edit', $user->id)
             ->withSuccess(trans('app.socials_updated'));
+    }
+	public function updateAddressDetails(User $user, UpdateAddressDetailsRequest $request)
+    {
+        $this->users->update($user->id, $request->all());
+        
+        event(new UpdatedByAdmin($user));
+
+        return redirect()->back()
+            ->withSuccess(trans('app.user_updated'));
     }
 }

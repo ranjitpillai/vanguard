@@ -1,6 +1,5 @@
 @extends('layouts.master')
-
-@section('title', 'About')
+@section('page-title', 'Home')
 
 @section('content')
 <div class="container-fluid bg-secondary banner">

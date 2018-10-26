@@ -162,6 +162,11 @@ Route::group(['middleware' => 'auth'], function () {
         'uses' => 'UsersController@updateDetails'
     ]);
 	
+	Route::put('user/{user}/update/address_details', [
+        'as' => 'user.update.address_details',
+        'uses' => 'UsersController@updateAddressDetails'
+    ]);
+	
 	Route::put('user/{user}/update/social-networks', [
         'as' => 'user.update.socials',
         'uses' => 'UsersController@updateSocialNetworks'
