@@ -16,9 +16,20 @@
                 </div>
 				 <div class="form-group">
                     <label for="address">@lang('app.company_code')</label>
-                    <input type="text" class="form-control" id="company_code"
+                    <input type="text" class="form-control" id="company_code" disabled
                            name="company_code" placeholder="@lang('app.company_code')" value="{{ $edit ? $company->company_code : '' }}">
                 </div>
+                <?php
+                    if(Auth::user()->hasRole('Admin')){    
+                ?>
+                <div class="form-group">
+                    <label for="status">@lang('app.status')</label>
+                    {!! Form::select('status', $statusCompany, $edit ? $company->status : '',
+                        ['class' => 'form-control', 'id' => 'status', $profile ? 'disabled' : '']) !!}
+                </div>
+                <?php
+                    }
+                ?>
             </div>
 
             <div class="col-md-6">

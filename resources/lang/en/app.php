@@ -385,7 +385,8 @@ return [
 	'company_details_big' => 'Company Details',
 	'update_company' => 'Update Company',
     'create_company' => 'Create Company',
-	
+    'Pending' => 'Pending',
+    'Inactive' => 'Inactive',
 	'company_created' => 'Company created successfully.',
     'company_updated' => 'Company updated successfully.',
     'company_deleted' => 'Company deleted successfully.',

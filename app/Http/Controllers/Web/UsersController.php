@@ -25,6 +25,7 @@ use Vanguard\User;
 use Vanguard\Device;
 use Auth;
 use Authy;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 
@@ -201,7 +202,7 @@ class UsersController extends Controller
         if (! array_get($data, 'country_id')) {
             $data['country_id'] = null;
         }
-
+        
         $var = $this->users->update($user->id, $data);
         $this->users->setRole($user->id, $request->role_id);
 
@@ -294,7 +295,12 @@ class UsersController extends Controller
             unset($data['password']);
             unset($data['password_confirmation']);
         }
-
+        
+        $generated_user_code_result = DB::select('SELECT returncode('.$user->id.') as username');
+        foreach($generated_user_code_result as $gucr){
+            $data['username'] = "U".$gucr->username;
+        }
+        
         $this->users->update($user->id, $data);
 
         event(new UpdatedByAdmin($user));

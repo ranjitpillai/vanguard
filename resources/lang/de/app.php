@@ -25,7 +25,8 @@ return [
     'latest_activity' => 'Letzte Aktivitäten',
     'no_activity_from_this_user_yet' => 'Keine Aktivität von diesem Benutzer noch nicht.',
     'view_all' => 'Alle ansehen',
-
+    'Pending' => 'anstehend',
+    'Inactive' => 'inaktiv',
     'user' => 'Benutzer',
     'user_sm' => 'Benutzer',
     'ip_address' => 'IP-Addresse',

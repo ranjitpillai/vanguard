@@ -25,7 +25,8 @@ return [
     'latest_activity' => 'Poslednje aktivnosti',
     'no_activity_from_this_user_yet' => 'Još uvek nije zabeležena aktivnost ovog korisnika.',
     'view_all' => 'Pogledaj sve',
-
+    'Pending' => 'U tijeku',
+    'Inactive' => 'Neaktivan',
     'user' => 'Korisnik',
     'user_sm' => 'korisnik',
     'ip_address' => 'IP adresa',

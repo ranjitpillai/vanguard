@@ -15,7 +15,7 @@ class UpdateCompanyAdminRequest extends Request
 	
         return [
             'company_name' => 'required',
-           // 'company_code' => 'required|regex:/^[a-zA-Z0-9\-_\.]+$/|unique:company,company_code,'.$company->id
+            'company_code' => 'required|regex:/^[a-zA-Z0-9\-_\.]+$/|unique:company,company_code,'.$company->id
         ];
     }
 }

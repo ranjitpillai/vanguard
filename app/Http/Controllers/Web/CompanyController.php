@@ -2,6 +2,7 @@
 
 namespace Vanguard\Http\Controllers\Web;
 use Cache;
+use DB;
 use Vanguard\Http\Controllers\Controller;
 /* use Vanguard\Events\Company\Created;
 use Vanguard\Events\Company\Deleted;
@@ -13,6 +14,7 @@ use Vanguard\Repositories\Company\CompanyRepository;
 use Vanguard\Repositories\User\UserRepository;
 use Vanguard\Services\Upload\CompanyAvatarManager;
 use Vanguard\Repositories\Country\CountryRepository;
+use Vanguard\Support\Enum\CompanyStatus;
 use Vanguard\Company;
 use Vanguard\User;
 use Illuminate\Http\Request;
@@ -97,11 +99,13 @@ class CompanyController extends Controller
     {
         $edit = true;
 		$profile = false;
-		$updateUrl = route('company.update.avatar.external', $company->id);
+        $updateUrl = route('company.update.avatar.external', $company->id);
+        $statusCompany = CompanyStatus::lists();
         $countries = $this->parseCountries($countryRepository);
         $company_users = $this->companies->getAllCompanyUsers($company->id);
+        
 		
-        return view('company.edit', compact('edit', 'company','updateUrl','profile','countries','company_users'));
+        return view('company.edit', compact('edit', 'company','statusCompany','updateUrl','profile','countries','company_users'));
     }
 
     private function parseCountries(CountryRepository $countryRepository)
@@ -119,12 +123,37 @@ class CompanyController extends Controller
     public function updateDetails(Company $company, UpdateCompanyRequest $request)
     {
 		$data = $request->all();
-		
+        
 		$profile = 0;
 		if(isset($data["profile"]) && $data["profile"] == 1){
 			$profile = 1;
-		}
-		
+        }
+        //Company Code Generation. returncode function already written in DB.
+        if(!empty($data)){
+            if($data['status'] == 'Active'){
+                $generated_company_code_result = DB::select('SELECT returncode('.$company->id.') as company_code');
+                foreach($generated_company_code_result as $gccr){
+                    $data['company_code'] = "C".$gccr->company_code;
+                }
+                $company_users = $this->companies->getAllCompanyUsers($company->id);
+                if (count($company_users) > 0 ) {
+                    foreach($company_users as $cu){
+                        $user_id =  $cu->id;
+                        $update_query = DB::table('users')->where('id', $user_id)->update(['role_id' => 4]);
+                    }
+                }
+            }
+            if($data['status'] == 'Inactive'){
+                $company_users = $this->companies->getAllCompanyUsers($company->id);
+                if (count($company_users) > 0 ) {
+                    foreach($company_users as $cu){
+                        $user_id =  $cu->id;
+                        $update_query = DB::table('users')->where('id', $user_id)->update(['role_id' => 2]);
+                    }
+                }
+                
+            }
+        }
 		unset($data["profile"]);
         $this->companies->update($company->id, $data);
 		
@@ -209,12 +238,14 @@ class CompanyController extends Controller
 	public function editCompany(CountryRepository $countryRepository)
     {
         $edit = true;
-		$profile = true;
+        $profile = true;
+        $statusCompany = CompanyStatus::lists();
 		$company = $this->companies->findByCode(Auth::user()->present()->company_code);
 		$countries = $this->parseCountries($countryRepository);
 		$updateUrl = route('company.update.avatar.external', $company->id);
-		$company_users = $this->companies->getAllCompanyUsers($company->id);
-        return view('company.edit', compact('edit', 'company','updateUrl','profile','countries','company_users'));
+        $company_users = $this->companies->getAllCompanyUsers($company->id);
+        
+        return view('company.edit', compact('edit', 'company','updateUrl','profile','statusCompany','countries','company_users'));
     }
 	
 	public function viewProfile()
