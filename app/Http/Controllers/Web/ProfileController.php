@@ -9,6 +9,7 @@ use Vanguard\Events\User\UpdatedProfileDetails;
 use Vanguard\Http\Controllers\Controller;
 use Vanguard\Http\Requests\User\EnableTwoFactorRequest;
 use Vanguard\Http\Requests\User\UpdateProfileDetailsRequest;
+use Vanguard\Http\Requests\User\UpdateAddressDetailsRequest;
 use Vanguard\Http\Requests\User\UpdateProfileLoginDetailsRequest;
 use Vanguard\Repositories\Activity\ActivityRepository;
 use Vanguard\Repositories\Country\CountryRepository;
@@ -67,12 +68,13 @@ class ProfileController extends Controller
         $edit = true;
         $roles = $rolesRepo->lists();
         $countries = [0 => 'Select a Country'] + $countryRepository->lists()->toArray();
+		$socials = $user->socialNetworks;
         $socialLogins = $this->users->getUserSocialLogins($this->theUser->id);
         $statuses = UserStatus::lists();
 
         return view(
             'user/profile',
-            compact('user', 'edit', 'roles', 'countries', 'socialLogins', 'statuses')
+            compact('user', 'edit', 'roles', 'countries', 'socials', 'socialLogins', 'statuses')
         );
     }
 
@@ -91,6 +93,26 @@ class ProfileController extends Controller
         return redirect()->back()
             ->withSuccess(trans('app.profile_updated_successfully'));
     }
+	
+	public function updateAddressDetails(UpdateAddressDetailsRequest $request)
+    {
+        $this->users->update($this->theUser->id, $request->except('role_id', 'status'));
+
+        event(new UpdatedProfileDetails);
+
+        return redirect()->back()
+            ->withSuccess(trans('app.profile_updated_successfully'));
+    }
+	public function updateSocialNetworks(Request $request)
+    {
+        $this->users->updateSocialNetworks($this->theUser->id, $request->get('socials'));
+
+        event(new UpdatedProfileDetails);
+
+        return redirect()->back()
+            ->withSuccess(trans('app.socials_updated'));
+    }
+
 
     /**
      * Upload and update user's avatar.

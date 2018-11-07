@@ -29,6 +29,17 @@
                             @lang('app.user_details')
                         </a>
                     </li>
+					<li class="nav-item">
+                        <a class="nav-link"
+                           id="address_details-tab"
+                           data-toggle="tab"
+                           href="#address_details"
+                           role="tab"
+                           aria-controls="home"
+                           aria-selected="true">
+                            @lang('app.address_details')
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            id="authentication-tab"
@@ -38,6 +49,17 @@
                            aria-controls="home"
                            aria-selected="true">
                             @lang('app.login_details')
+                        </a>
+                    </li>
+					<li class="nav-item">
+                        <a class="nav-link"
+                           id="socialnetworks"
+                           data-toggle="tab"
+                           href="#social-networks"
+                           role="tab"
+                           aria-controls="home"
+                           aria-selected="true">
+                            @lang('app.social_networks')
                         </a>
                     </li>
                     @if (settings('2fa.enabled'))
@@ -61,10 +83,21 @@
                             @include('user.partials.details', ['profile' => true])
                         {!! Form::close() !!}
                     </div>
+					<div class="tab-pane fade show px-2" id="address_details" role="tabpanel" aria-labelledby="nav-home-tab">
+                        {!! Form::open(['route' => ['profile.update.address_details', $user->id], 'method' => 'PUT', 'id' => 'address-details-form']) !!}
+                            @include('user.partials.address_details')
+                        {!! Form::close() !!}
+                    </div>
 
                     <div class="tab-pane fade px-2" id="login-details" role="tabpanel" aria-labelledby="nav-profile-tab">
                         {!! Form::open(['route' => 'profile.update.login-details', 'method' => 'PUT', 'id' => 'login-details-form']) !!}
                             @include('user.partials.auth')
+                        {!! Form::close() !!}
+                    </div>
+					
+					<div class="tab-pane fade px-2" id="social-networks" role="tabpanel" aria-labelledby="nav-social-tab">
+                        {!! Form::open(['route' => ['profile.update.socials', $user->id], 'method' => 'PUT', 'id' => 'social-networks-form'] ) !!}
+                            @include('user.partials.social-networks')
                         {!! Form::close() !!}
                     </div>
 

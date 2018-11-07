@@ -93,6 +93,16 @@ Route::group(['middleware' => 'auth'], function () {
         'as' => 'profile.update.details',
         'uses' => 'ProfileController@updateDetails'
     ]);
+	
+	Route::put('profile/address_details/update', [
+        'as' => 'profile.update.address_details',
+        'uses' => 'ProfileController@updateAddressDetails'
+    ]);
+	
+	Route::put('profile/socials/update', [
+        'as' => 'profile.update.socials',
+        'uses' => 'ProfileController@updateSocialNetworks'
+    ]);
 
     Route::post('profile/avatar/update', [
         'as' => 'profile.update.avatar',
